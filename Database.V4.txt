@@ -1,0 +1,122 @@
+بالتأكيد. هذا هو المخطط التفصيلي لقاعدة البيانات (Database Schema) المقترحة للنسخة الجديدة. بناء قاعدة البيانات بالطريقة الصحيحة هو أهم خطوة لضمان نجاح "البنية الشبكية" التي نطمح إليها.
+
+فلسفة تصميم قاعدة البيانات:
+
+التطبيع (Normalization): كل جدول يجب أن يركز على مهمة واحدة فقط. لا للتكرار.
+
+العلاقات الواضحة (Clear Relationships): نستخدم المفاتيح الخارجية (FOREIGN KEY) لإنشاء علاقات صريحة وقوية بين الجداول. هذا يضمن تكامل البيانات ويمنع الأخطاء.
+
+المرونة (Flexibility): استخدام جداول الربط (مثل entity_documents) يسمح لنا بإنشاء أنواع جديدة من العلاقات في المستقبل دون الحاجة لتغيير بنية الجداول القديمة.
+
+الجداول المقترحة (التي سنبنيها الآن والخطوات القادمة):
+1. جدول users (المستخدمون)
+
+الغرض: تخزين معلومات تسجيل دخول المستخدمين. Laravel ينشئه افتراضيًا.
+
+أهم الأعمدة: id, name, email, password.
+
+الأعمدة التي سنضيفها:
+
+role_id (INT, FOREIGN KEY): لربط المستخدم بالدور الخاص به في جدول roles.
+
+deleted_at (TIMESTAMP): لدعم الحذف الناعم.
+
+علاقته بالآخرين:
+
+Roles: واحد لواحد (المستخدم له دور واحد).
+
+Branches: كثير لكثير (سيتم ربطه بجدول user_branches ليحدد أي فروع يمكن للمستخدم رؤيتها).
+
+2. جدول branches (الفروع/الكيانات)
+
+الغرض: الجدول الرئيسي الذي يمثل الشركات أو الأفراد الذين يملكون أو يديرون الأصول.
+
+أهم الأعمدة: id, branch_name, branch_code, branch_type, registration_number, tax_number, phone, email, address, status.
+
+علاقته بالآخرين: هو "الأب" لكثير من الجداول. العقارات والعملاء والموردين ترتبط به بعلاقة (Many-to-One).
+
+3. جدول lookup_options (تهيئة المدخلات)
+
+الغرض: "قاموس" النظام. أهم جدول في المشروع لضمان المرونة.
+
+أهم الأعمدة: id, group_key, option_key, option_value, custom_fields_schema, advanced_config.
+
+علاقته بالآخرين: ليس له علاقة مباشرة (FOREIGN KEY)، ولكن يتم استدعاؤه من كل مكان في الكود لجلب قوائم الخيارات.
+
+4. جداول الصلاحيات والأدوار (RBAC - Role-Based Access Control)
+
+الغرض: بناء نظام أمني متكامل.
+
+الجداول:
+
+roles (الأدوار): id, role_name, description.
+
+permissions (الصلاحيات): id, permission_key, group_key.
+
+role_permissions (جدول الربط): role_id, permission_id.
+
+علاقتهم: علاقة (Many-to-Many) بين الأدوار والصلاحيات.
+
+5. جدول properties (العقارات)
+
+الغرض: تخزين البيانات الأساسية للعقار فقط.
+
+أهم الأعمدة: id, branch_id, property_name, property_code, property_type, city, area, status. (لاحظ أننا حذفنا owner_name و deed_number).
+
+علاقته بالآخرين:
+
+Branches: كثير لواحد (عبر branch_id).
+
+Owners: كثير لكثير (عبر جدول الربط الجديد property_owners).
+
+Documents: كثير لكثير (عبر جدول الربط entity_documents).
+
+6. جدول owners (الملاك)
+
+الغرض: تعريف الملاك (أفراد أو شركات).
+
+أهم الأعمدة: id, owner_name, owner_type, id_number, mobile.
+
+علاقته بالآخرين:
+
+Properties: كثير لكثير (عبر property_owners).
+
+Branches: كثير لكثير (عبر owner_branches إذا أردنا تحديد أي ملاك يتبعون لأي فرع).
+
+7. جداول الربط (Pivot Tables - قلب الشبكة)
+
+property_owners (جديد):
+
+الأعمدة: property_id, owner_id, ownership_percentage.
+
+وظيفته: يربط بين جدول properties وجدول owners.
+
+entity_documents (موجود من قبل، ولكن سنفعّله):
+
+الأعمدة: document_id, entity_type, entity_id.
+
+وظيفته: يربط جدول documents بأي جدول آخر في النظام (properties, owners, clients, ...). هذا جدول "متعدد الأشكال" (Polymorphic).
+
+الجداول التي سيتم عملها مستقبلاً:
+
+units (الوحدات):
+
+سيرتبط بجدول properties بعلاقة (Many-to-One) عبر property_id.
+
+clients (العملاء) و suppliers (الموردين):
+
+سيرتبط كل منهما بجدول branches (Many-to-One).
+
+contracts_rental (عقود الإيجار) و contracts_supply (عقود التوريد):
+
+ستربط بين properties/units و clients/suppliers.
+
+payment_schedules (جداول الدفعات):
+
+سترتبط بالعقود (Many-to-One).
+
+transactions (الحركات المالية):
+
+ستكون هي القلب المالي، وسترتبط بجداول الدفعات، والعملاء، والموردين.
+
+هذا المخطط يضمن بناء قاعدة بيانات قوية، مترابطة، ومرنة، جاهزة لدعم كل الأفكار المستقبلية التي نطمح إليها.
