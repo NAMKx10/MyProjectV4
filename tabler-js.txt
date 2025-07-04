@@ -1,0 +1,7 @@
+
+
+
+https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler-theme.js
+https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler-theme.min.js
+https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler.js
+https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler.min.js
