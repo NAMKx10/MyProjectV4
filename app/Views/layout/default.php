@@ -131,6 +131,48 @@
         $('#main-modal').on('hidden.bs.modal', function(){
             $(this).find('.modal-content').html('');
         });
+
+
+
+        // (جديد) كود عام لمعالجة كل أزرار الحذف التي تحتوي على كلاس "confirm-delete"
+        $('body').on('click', '.confirm-delete', function(e) {
+            e.preventDefault(); // نمنع الرابط من الانتقال الفوري
+
+            const button = $(this);
+            const url = button.attr('href');
+            const csrfToken = button.data('csrf-token');
+
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: "سيتم حذف هذا العنصر (أو نقله للأرشيف)!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'نعم، قم بالحذف!',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // إذا وافق المستخدم، نقوم بإنشاء نموذج وهمي في الذاكرة
+                    // ونرسل طلب الحذف كـ POST (أكثر أمانًا)
+                    var form = $('<form>', {
+                        'method': 'POST',
+                        'action': url
+                    });
+                    var csrfInput = $('<input>', {
+                        'type': 'hidden',
+                        'name': '<?= csrf_token() ?>', // اسم حقل CSRF
+                        'value': csrfToken
+                    });
+                    form.append(csrfInput).appendTo('body').submit();
+                }
+            });
+        });
+    
+
+
+
+
       });
     </script>
 

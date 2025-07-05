@@ -89,9 +89,13 @@ $active_group_options = $active_group_data['options'] ?? [];
                                                     <a href="<?= site_url('lookups/edit-group/' . $group_key) ?>" class="btn btn-icon text-warning" title="تعديل المجموعة" data-bs-toggle="modal" data-bs-target="#main-modal">
                                                         <i class="ti ti-edit"></i>
                                                     </a>
-                                                    <a href="#" class="btn btn-icon btn text-danger" title="حذف المجموعة">
-                                                        <i class="ti ti-trash"></i>
-                                                    </a>
+                                                                                                    <!-- زر الحذف المحدث -->
+                                                <a href="<?= site_url('lookups/delete-group/' . $group_key) ?>" 
+                                                   class="btn btn-icon text-danger ms-0 confirm-delete" 
+                                                   title="حذف المجموعة"
+                                                   data-csrf-token="<?= csrf_hash() ?>">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -110,8 +114,13 @@ $active_group_options = $active_group_data['options'] ?? [];
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">خيارات: "<?= esc($active_group_data['display_name'] ?? $active_group_key) ?>"</h3>
-                        <div class="card-actions">
-                            <a href="#" class="btn btn-primary"><i class="ti ti-plus me-2"></i>إضافة خيار</a>
+                                                <div class="card-actions">
+                            <a href="<?= site_url('lookups/new-option/' . $active_group_key) ?>" 
+                               class="btn btn-primary"
+                               data-bs-toggle="modal" 
+                               data-bs-target="#main-modal">
+                                <i class="ti ti-plus me-2"></i>إضافة خيار
+                            </a>
                         </div>
                     </div>
                     
@@ -144,10 +153,23 @@ $active_group_options = $active_group_data['options'] ?? [];
                                                     <?= esc($option['option_value']) ?>
                                                 </span>
                                             </td>
-                                            <td>
+                                                                                        <td>
                                                 <div class="btn-list flex-nowrap">
-                                                    <a href="#" class="btn btn-secondary btn-icon" title="تعديل الخيار"><i class="ti ti-edit"></i></a>
-                                                    <a href="#" class="btn btn-danger btn-icon" title="حذف الخيار"><i class="ti ti-trash"></i></a>
+                                                    <!-- زر التعديل المحدث -->
+                                                    <a href="<?= site_url('lookups/edit-option/' . $option['id']) ?>" 
+                                                       class="btn btn-icon text-warning" 
+                                                       title="تعديل الخيار"
+                                                       data-bs-toggle="modal" 
+                                                       data-bs-target="#main-modal">
+                                                        <i class="ti ti-edit"></i>
+                                                    </a>
+                                                    <!-- زر الحذف المحدث -->
+                                                    <a href="<?= site_url('lookups/delete-option/' . $option['id']) ?>" 
+                                                       class="btn btn-icon text-danger confirm-delete" 
+                                                       title="حذف الخيار"
+                                                       data-csrf-token="<?= csrf_hash() ?>">
+                                                        <i class="ti ti-trash"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
