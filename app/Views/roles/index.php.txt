@@ -1,0 +1,47 @@
+<?php echo $this->extend('layout/default'); ?>
+<?php echo $this->section('content'); ?>
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col"><h2 class="page-title"><?= esc($title) ?></h2></div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="<?= site_url('roles/new') ?>" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#main-modal">
+                    <i class="ti ti-plus me-2"></i>إضافة دور جديد
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table card-table table-vcenter text-nowrap">
+                    <thead><tr><th>اسم الدور</th><th>الوصف</th><th>عدد المستخدمين</th><th class="w-1"></th></tr></thead>
+                    <tbody>
+                        <?php foreach ($roles as $role): ?>
+                        <tr>
+                            <td><?= esc($role['role_name']); ?></td>
+                            <td><span class="text-muted"><?= esc($role['description']); ?></span></td>
+                            <td><span class="badge bg-blue-lt"><?= $role['users_count']; ?></span></td>
+                            <td class="text-end">
+                                <div class="btn-list flex-nowrap">
+                                    <a href="<?= site_url('roles/permissions/' . $role['id']); ?>" class="btn btn-info"><i class="ti ti-key me-2"></i>تعديل الصلاحيات</a>
+                                    <?php if ($role['id'] > 2): // لا تسمح بتعديل أول دورين ?>
+                                        <a href="<?= site_url('roles/edit/' . $role['id']); ?>" class="btn text-warning" data-bs-toggle="modal" data-bs-target="#main-modal">تعديل</a>
+                                        <a href="<?= site_url('roles/delete/' . $role['id']); ?>" class="btn text-danger confirm-delete" data-csrf-token="<?= csrf_hash() ?>">حذف</a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php echo $this->endSection(); ?>

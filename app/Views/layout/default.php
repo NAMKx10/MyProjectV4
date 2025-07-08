@@ -13,14 +13,20 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" rel="stylesheet" />
 
-    <style> body { font-feature-settings: "cv03", "cv04", "cv11"; } </style>
+    <style> body { font-feature-settings: "cv03", "cv04", "cv11"; }
+            .table-selectable tr:has(input.form-check-input:checked) {
+            background-color: var(--tblr-primary-lt) !important;
+            box-shadow: inset -3px 0 0 0 var(--tblr-primary) !important;
+      }
+    </style>
   </head>
   
   <body class="layout-fluid">
     <div class="page">
       
       <header class="navbar navbar-expand-md d-print-none">
-        <div class="container-xl">
+        <!-- ... محتوى الهيدر يبقى كما هو ... -->
+         <div class="container-xl">
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -59,43 +65,37 @@
       <div class="page-wrapper">
         <div class="page-body">
           <div class="container-xl">
-            <!-- (جديد) هذا القسم مسؤول عن عرض رسائل النجاح أو الخطأ -->
+            <!-- عرض رسائل النجاح أو الخطأ -->
             <?php if (session()->getFlashdata('success')): ?>
-                <div class="alert alert-success" role="alert">
-                    <?= session()->getFlashdata('success') ?>
-                </div>
+                <div class="alert alert-success" role="alert"><?= session()->getFlashdata('success') ?></div>
             <?php endif; ?>
             <?php if (session()->getFlashdata('error')): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?= session()->getFlashdata('error') ?>
-                </div>
+                <div class="alert alert-danger" role="alert"><?= session()->getFlashdata('error') ?></div>
             <?php endif; ?>
 
-            <!-- هذا هو المكان الذي سيتم فيه حقن محتوى كل صفحة -->
+            <!-- حقن محتوى كل صفحة -->
             <?= $this->renderSection('content') ?>
           </div>
         </div>
         
         <footer class="footer footer-transparent d-print-none">
-          <div class="container-xl">
-            <div class="row text-center align-items-center flex-row-reverse">
-              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                <ul class="list-inline list-inline-dots mb-0">
-                  <li class="list-inline-item">جميع الحقوق محفوظة © <?= date('Y') ?></li>
-                </ul>
-              </div>
+             <div class="container-xl">
+                <div class="row text-center align-items-center flex-row-reverse">
+                <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                    <ul class="list-inline list-inline-dots mb-0">
+                    <li class="list-inline-item">جميع الحقوق محفوظة © <?= date('Y') ?></li>
+                    </ul>
+                </div>
+                </div>
             </div>
-          </div>
         </footer>
       </div>
     </div>
     
-    <!-- (جديد) النافذة المنبثقة الرئيسية التي سيتم تحميل كل النماذج بداخلها -->
+    <!-- النافذة المنبثقة الرئيسية -->
     <div class="modal modal-blur fade" id="main-modal" tabindex="-1">
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <!-- سيتم حقن المحتوى هنا عبر JavaScript -->
-        </div>
+        <div class="modal-content"></div>
       </div>
     </div>
 
@@ -103,78 +103,12 @@
     <!-- ملفات JavaScript الأساسية                                         -->
     <!-- =================================================================== -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/NAMKx10/mytabler130@main/tabler-js/tabler.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.22.2/sweetalert2.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     
-    <!-- (جديد) السكريبت المخصص لتشغيل النوافذ المنبثقة -->
-    <script>
-      $(document).ready(function() {
-        // هذا الكود يستمع لأي عنصر يحتوي على data-bs-toggle="modal"
-        // وعند الضغط عليه، يقوم بتحميل محتوى النافذة من الرابط الموجود في href
-        $('#main-modal').on('show.bs.modal', function(e) {
-            var button = $(e.relatedTarget);
-            var url = button.attr('href');
-            var modal = $(this);
-            // نعرض أيقونة تحميل مؤقتة
-            modal.find('.modal-content').html('<div class="modal-body text-center p-4"><div class="spinner-border"></div></div>');
-            // نقوم بتحميل المحتوى من الرابط
-            modal.find('.modal-content').load(url, function(response, status, xhr) {
-                if (status == "error") {
-                    // في حالة حدوث خطأ، نعرض رسالة خطأ
-                    $(this).html('<div class="modal-body"><div class="alert alert-danger">فشل تحميل المحتوى. يرجى المحاولة مرة أخرى.</div></div>');
-                }
-            });
-        });
-
-        // هذا الكود يقوم بإفراغ محتوى النافذة بعد إغلاقها للحفاظ على الأداء
-        $('#main-modal').on('hidden.bs.modal', function(){
-            $(this).find('.modal-content').html('');
-        });
-
-
-
-        // (جديد) كود عام لمعالجة كل أزرار الحذف التي تحتوي على كلاس "confirm-delete"
-        $('body').on('click', '.confirm-delete', function(e) {
-            e.preventDefault(); // نمنع الرابط من الانتقال الفوري
-
-            const button = $(this);
-            const url = button.attr('href');
-            const csrfToken = button.data('csrf-token');
-
-            Swal.fire({
-                title: 'هل أنت متأكد؟',
-                text: "سيتم حذف هذا العنصر (أو نقله للأرشيف)!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'نعم، قم بالحذف!',
-                cancelButtonText: 'إلغاء'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // إذا وافق المستخدم، نقوم بإنشاء نموذج وهمي في الذاكرة
-                    // ونرسل طلب الحذف كـ POST (أكثر أمانًا)
-                    var form = $('<form>', {
-                        'method': 'POST',
-                        'action': url
-                    });
-                    var csrfInput = $('<input>', {
-                        'type': 'hidden',
-                        'name': '<?= csrf_token() ?>', // اسم حقل CSRF
-                        'value': csrfToken
-                    });
-                    form.append(csrfInput).appendTo('body').submit();
-                }
-            });
-        });
-    
-
-
-
-
-      });
-    </script>
+    <!-- (مُصحّح) هنا نقوم بتضمين ملف السكربتات الخارجي الخاص بنا -->
+    <?= $this->include('layout/scripts'); ?>
 
   </body>
 </html>

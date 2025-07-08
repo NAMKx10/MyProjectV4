@@ -1,0 +1,55 @@
+<?php echo $this->extend('layout/default'); ?>
+<?php echo $this->section('content'); ?>
+
+<form method="POST" action="<?= site_url('roles/save-permissions') ?>">
+<?= csrf_field() ?>
+<input type="hidden" name="role_id" value="<?= $role['id'] ?>">
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">تعديل صلاحيات الدور: <span class="text-primary"><?= esc($role['role_name']) ?></span></h2>
+                <div class="text-muted mt-1"><?= esc($role['description']) ?></div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="<?= site_url('roles') ?>" class="btn"><i class="ti ti-arrow-left me-2"></i>العودة لقائمة الأدوار</a>
+                <?php if($role['id'] != 1): // لا يمكن تعديل صلاحيات المدير الخارق ?>
+                    <button type="submit" class="btn btn-primary">حفظ الصلاحيات</button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <?php if($role['id'] == 1): ?>
+            <div class="alert alert-warning">لا يمكن تعديل صلاحيات دور "المدير الخارق". هذا الدور يملك كل الصلاحيات بشكل دائم.</div>
+        <?php endif; ?>
+
+        <div class="row row-cards">
+            <?php foreach($grouped_permissions as $group_name => $permissions): ?>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title"><?= esc($group_name) ?></h3></div>
+                        <div class="card-body">
+                            <?php foreach($permissions as $permission): ?>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="<?= $permission['id'] ?>" id="perm-<?= $permission['id'] ?>"
+                                        <?= in_array($permission['id'], $current_permission_ids) ? 'checked' : '' ?>
+                                        <?= ($role['id'] == 1) ? 'disabled checked' : '' ?> >
+                                    <label class="form-check-label" for="perm-<?= $permission['id'] ?>"><?= esc($permission['description']) ?></label>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+</form>
+
+<?php echo $this->endSection(); ?>

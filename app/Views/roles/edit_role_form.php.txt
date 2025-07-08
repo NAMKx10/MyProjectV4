@@ -1,0 +1,13 @@
+<div class="modal-header"><h5 class="modal-title">تعديل الدور</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<form method="POST" action="<?= site_url('roles/update') ?>">
+    <?= csrf_field() ?>
+    <input type="hidden" name="id" value="<?= esc($role['id']) ?>">
+    <div class="modal-body">
+        <div class="mb-3"><label class="form-label required">اسم الدور</label><input type="text" class="form-control" name="role_name" value="<?= esc($role['role_name']) ?>" required></div>
+        <div class="mb-3"><label class="form-label">الوصف</label><textarea class="form-control" name="description" rows="3"><?= esc($role['description']) ?></textarea></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn" data-bs-dismiss="modal">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+    </div>
+</form>
