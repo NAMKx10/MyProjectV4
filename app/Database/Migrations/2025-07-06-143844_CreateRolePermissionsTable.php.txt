@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class CreateRolePermissionsTable extends Migration
+{
+    /**
+     * الدالة التي تنشئ الجدول.
+     */
+    public function up()
+    {
+        $this->forge->addField([
+            // حقل لربط السجل بالدور
+            'role_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
+            // حقل لربط السجل بالصلاحية
+            'permission_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
+        ]);
+
+        // (مهم) نحدد أن المفتاح الرئيسي مركب من كلا العمودين
+        // هذا يمنع إضافة نفس الصلاحية لنفس الدور أكثر من مرة
+        $this->forge->addPrimaryKey(['role_id', 'permission_id']);
+
+        // نربط role_id بجدول roles
+        $this->forge->addForeignKey('role_id', 'roles', 'id', 'CASCADE', 'CASCADE');
+        
+        // نربط permission_id بجدول permissions
+        $this->forge->addForeignKey('permission_id', 'permissions', 'id', 'CASCADE', 'CASCADE');
+
+        // نعطي الأمر النهائي لإنشاء الجدول
+        $this->forge->createTable('role_permissions');
+    }
+
+    /**
+     * الدالة التي تحذف الجدول (للتراجع).
+     */
+    public function down()
+    {
+        $this->forge->dropTable('role_permissions');
+    }
+}

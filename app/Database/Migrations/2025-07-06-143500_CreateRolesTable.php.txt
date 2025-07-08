@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class CreateRolesTable extends Migration
+{
+    /**
+     * الدالة التي تنشئ الجدول.
+     */
+    public function up()
+    {
+        $this->forge->addField([
+            // حقل المعرف الرئيسي (Primary Key)
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            // اسم الدور الذي يظهر للمستخدم (مثل: مدير، محاسب)
+            'role_name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '150',
+            ],
+            // الوصف (اختياري)
+            'description' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            // حقول Timestamps
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            // حقل الحذف الناعم
+            'deleted_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+        ]);
+
+        // نحدد أن حقل 'id' هو المفتاح الرئيسي
+        $this->forge->addKey('id', true);
+
+        // نعطي الأمر النهائي لإنشاء الجدول
+        $this->forge->createTable('roles');
+    }
+
+    /**
+     * الدالة التي تحذف الجدول (للتراجع).
+     */
+    public function down()
+    {
+        $this->forge->dropTable('roles');
+    }
+}

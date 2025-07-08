@@ -1,0 +1,164 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\RoleModel;
+use App\Models\PermissionGroupModel;
+
+class Roles extends BaseController
+{
+    /**
+     * يعرض الصفحة الرئيسية لإدارة الأدوار.
+     */
+        /**
+     * يعرض الصفحة الرئيسية لإدارة الأدوار.
+     */
+    public function index()
+    {
+        $roleModel = new RoleModel();
+        
+        // تم تعديل الاستعلام مؤقتًا ليعمل بدون جدول المستخدمين
+        // سنعيد تفعيل حساب عدد المستخدمين بعد بناء موديول المستخدمين
+        $roles = $roleModel->where('roles.deleted_at', null)->findAll();
+
+        // نضيف users_count بشكل يدوي ومؤقت، حيث لا يوجد مستخدمون بعد
+        foreach ($roles as &$role) {
+            $role['users_count'] = 0;
+        }
+
+        $data = [
+            'title' => 'إدارة الأدوار',
+            'roles' => $roles
+        ];
+        
+        return view('roles/index', $data);
+    }
+
+    /**
+     * يعرض نموذج إضافة دور جديد.
+     */
+    public function new()
+    {
+        return view('roles/new_role_form');
+    }
+
+    /**
+     * يحفظ الدور الجديد في قاعدة البيانات.
+     */
+    public function create()
+    {
+        $model = new RoleModel();
+        if ($model->insert($this->request->getPost())) {
+            return redirect()->to('roles')->with('success', 'تم إضافة الدور بنجاح.');
+        }
+        return redirect()->back()->withInput()->with('error', 'فشل إضافة الدور.');
+    }
+
+    /**
+     * يعرض نموذج تعديل بيانات الدور الأساسية.
+     */
+    public function edit($id)
+    {
+        $model = new RoleModel();
+        $data['role'] = $model->find($id);
+        return view('roles/edit_role_form', $data);
+    }
+
+    /**
+     * يحدث بيانات الدور الأساسية.
+     */
+    public function update()
+    {
+        $model = new RoleModel();
+        $id = $this->request->getPost('id');
+        if ($model->update($id, $this->request->getPost())) {
+            return redirect()->to('roles')->with('success', 'تم تحديث الدور بنجاح.');
+        }
+        return redirect()->back()->withInput()->with('error', 'فشل تحديث الدور.');
+    }
+
+    /**
+     * يحذف دورًا (حذف ناعم)، بشرط ألا يكون من الأدوار الأساسية.
+     */
+    public function delete($id)
+    {
+        // لا نسمح بحذف أول دورين (مدير خارق، مدير نظام)
+        if ($id <= 2) {
+            return redirect()->to('roles')->with('error', 'لا يمكن حذف الأدوار الأساسية.');
+        }
+        
+        $model = new RoleModel();
+        if ($model->delete($id)) {
+            return redirect()->to('roles')->with('success', 'تم حذف الدور بنجاح.');
+        }
+        return redirect()->to('roles')->with('error', 'فشل حذف الدور.');
+    }
+
+    /**
+     * يعرض صفحة تعديل الصلاحيات لدور معين.
+     */
+    public function editPermissions($role_id)
+    {
+        $roleModel = new RoleModel();
+        $groupModel = new PermissionGroupModel();
+
+        $role = $roleModel->find($role_id);
+        if (!$role) {
+            return redirect()->to('roles')->with('error', 'الدور غير موجود.');
+        }
+
+        $all_permissions = $groupModel->select('permission_groups.group_name, permissions.id, permissions.description')
+                                     ->join('permissions', 'permissions.group_id = permission_groups.id')
+                                     ->orderBy('permission_groups.display_order', 'ASC')
+                                     ->findAll();
+        
+        $grouped_permissions = [];
+        foreach($all_permissions as $perm){
+            $grouped_permissions[$perm['group_name']][] = $perm;
+        }
+
+        $current_permissions = $this->db->table('role_permissions')
+                                        ->where('role_id', $role_id)
+                                        ->get()->getResultArray();
+        $current_permission_ids = array_column($current_permissions, 'permission_id');
+
+        $data = [
+            'title'                 => 'تعديل صلاحيات الدور: ' . $role['role_name'],
+            'role'                  => $role,
+            'grouped_permissions'   => $grouped_permissions,
+            'current_permission_ids' => $current_permission_ids,
+        ];
+
+        return view('roles/edit_permissions', $data);
+    }
+
+    /**
+     * يحفظ الصلاحيات المحدثة لدور معين.
+     */
+    public function savePermissions()
+    {
+        $role_id = $this->request->getPost('role_id');
+        $permissions = $this->request->getPost('permissions') ?? [];
+
+        // لا نسمح بتعديل صلاحيات المدير الخارق
+        if ($role_id == 1) {
+            return redirect()->to('roles/permissions/' . $role_id)->with('error', 'لا يمكن تعديل صلاحيات المدير الخارق.');
+        }
+
+        $rolePermissionsTable = $this->db->table('role_permissions');
+        $rolePermissionsTable->where('role_id', $role_id)->delete();
+
+        if (!empty($permissions)) {
+            $batch_data = [];
+            foreach ($permissions as $permission_id) {
+                $batch_data[] = [
+                    'role_id'       => $role_id,
+                    'permission_id' => $permission_id
+                ];
+            }
+            $rolePermissionsTable->insertBatch($batch_data);
+        }
+
+        return redirect()->to('roles/permissions/' . $role_id)->with('success', 'تم تحديث الصلاحيات بنجاح.');
+    }
+}

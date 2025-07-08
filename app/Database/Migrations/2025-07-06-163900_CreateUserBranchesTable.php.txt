@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class CreateUserBranchesTable extends Migration
+{
+    public function up()
+    {
+        $this->forge->addField([
+            'user_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+            'branch_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+        ]);
+        $this->forge->addPrimaryKey(['user_id', 'branch_id']);
+        $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
+        // ملاحظة: سنضيف علاقة الربط مع جدول الفروع عند إنشائه
+        $this->forge->createTable('user_branches');
+    }
+
+    public function down()
+    {
+        $this->forge->dropTable('user_branches');
+    }
+}

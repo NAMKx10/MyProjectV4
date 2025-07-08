@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class AddFieldsToBranchesTable extends Migration
+{
+    /**
+     * الدالة التي تضيف الأعمدة الجديدة.
+     */
+    public function up()
+    {
+        // مصفوفة تحتوي على كل الأعمدة الجديدة التي نريد إضافتها
+        $fields = [
+            'branch_code' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => true,
+                'after'      => 'branch_name', // نحدد مكان العمود
+            ],
+            'notes' => [
+                'type' => 'TEXT',
+                'null' => true,
+                'after' => 'address',
+            ],
+            'clients_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'status',
+            ],
+            'suppliers_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'clients_count',
+            ],
+            'rental_contracts_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'suppliers_count',
+            ],
+            'supply_contracts_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'rental_contracts_count',
+            ]
+        ];
+
+        // نعطي الأمر لإضافة هذه الأعمدة إلى جدول 'branches'
+        $this->forge->addColumn('branches', $fields);
+    }
+
+    /**
+     * الدالة التي تزيل الأعمدة الجديدة (للتراجع).
+     */
+    public function down()
+    {
+        // نحدد أسماء الأعمدة التي نريد حذفها
+        $columns_to_drop = [
+            'branch_code', 
+            'notes', 
+            'clients_count', 
+            'suppliers_count', 
+            'rental_contracts_count', 
+            'supply_contracts_count'
+        ];
+
+        // نعطي الأمر لحذف هذه الأعمدة من جدول 'branches'
+        $this->forge->dropColumn('branches', $columns_to_drop);
+    }
+}

@@ -1,0 +1,130 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\BranchModel;
+use App\Models\LookupOptionModel;
+
+class Branches extends BaseController
+{
+    public function index()
+    {
+        $branchModel = new BranchModel();
+        $lookupModel = new LookupOptionModel();
+
+         // (جديد) نقرأ قيمة عدد السجلات من الرابط، مع قيمة افتراضية 10
+        $perPage = $this->request->getGet('perPage') ?? 5;
+
+
+        // --- معالجة الفرز والبحث ---
+        $q      = $this->request->getGet('q');
+        $type   = $this->request->getGet('type');
+        $status = $this->request->getGet('status');
+
+        $branches_query = $branchModel
+            ->select('branches.*, entity_type_lk.option_value as entity_type_name, status_lk.option_value as status_name, status_lk.bg_color, status_lk.color')
+            ->join('lookup_options as entity_type_lk', 'entity_type_lk.option_key = branches.entity_type_key AND entity_type_lk.group_key = "entity_type"', 'left')
+            ->join('lookup_options as status_lk', 'status_lk.option_key = branches.status AND status_lk.group_key = "property_status"', 'left');
+
+        if ($q) {
+            $branches_query->groupStart()
+                ->like('branches.branch_name', $q)
+                ->orLike('branches.branch_code', $q)
+                ->orLike('branches.registration_number', $q)
+            ->groupEnd();
+        }
+        if ($type) { $branches_query->where('branches.entity_type_key', $type); }
+        if ($status) { $branches_query->where('branches.status', $status); }
+
+        // --- حساب الإحصائيات ---
+        $stats = [
+            'total'       => (new BranchModel())->countAllResults(),
+            'active'      => (new BranchModel())->where('status', 'active')->countAllResults(),
+            'individuals' => (new BranchModel())->where('entity_type_key', 'individual')->countAllResults(),
+            'companies'   => (new BranchModel())->whereIn('entity_type_key', ['company', 'institution'])->countAllResults(),
+        ];
+        
+        // --- بناء استعلام جلب البيانات مع الربط ---
+        
+        $data = [
+            'title'        => 'إدارة الفروع والكيانات',
+            // (مُحدّث) نستخدم متغير $perPage هنا
+            'branches'     => $branches_query->paginate($perPage), 
+            'pager'        => $branchModel->pager,
+            'stats'        => $stats,
+            'entity_types' => $lookupModel->where('group_key', 'entity_type')->where('option_key !=', 'entity_type')->findAll(),
+            'statuses'     => $lookupModel->where('group_key', 'property_status')->where('option_key !=', 'property_status')->findAll(),
+            'perPage'      => $perPage, // (جديد) نمرر المتغير للواجهة
+        ];
+
+        return view('branches/index', $data);
+    }
+
+
+    /**
+     * يعرض نموذج إضافة فرع جديد.
+     */
+    public function new()
+    {
+        $lookupModel = new LookupOptionModel();
+        $data = [
+            'title'        => 'إضافة فرع جديد',
+            'entity_types' => $lookupModel->where('group_key', 'entity_type')->where('option_key !=', 'entity_type')->findAll(),
+            'statuses'     => $lookupModel->where('group_key', 'property_status')->where('option_key !=', 'property_status')->findAll(),
+        ];
+        return view('branches/new_branch_form', $data);
+    }
+
+    /**
+     * يحفظ الفرع الجديد في قاعدة البيانات.
+     */
+    public function create()
+    {
+        $model = new BranchModel();
+        if ($model->insert($this->request->getPost())) {
+            return redirect()->to('branches')->with('success', 'تم إضافة الفرع بنجاح.');
+        }
+        return redirect()->back()->withInput()->with('error', 'فشل إضافة الفرع.');
+    }
+
+    /**
+     * يعرض نموذج تعديل بيانات الفرع.
+     */
+    public function edit($id)
+    {
+        $branchModel = new BranchModel();
+        $lookupModel = new LookupOptionModel();
+        $data = [
+            'title'        => 'تعديل الفرع',
+            'branch'       => $branchModel->find($id),
+            'entity_types' => $lookupModel->where('group_key', 'entity_type')->where('option_key !=', 'entity_type')->findAll(),
+            'statuses'     => $lookupModel->where('group_key', 'property_status')->where('option_key !=', 'property_status')->findAll(),
+        ];
+        return view('branches/edit_branch_form', $data);
+    }
+
+    /**
+     * يحدث بيانات الفرع في قاعدة البيانات.
+     */
+    public function update()
+    {
+        $model = new BranchModel();
+        $id = $this->request->getPost('id');
+        if ($model->update($id, $this->request->getPost())) {
+            return redirect()->to('branches')->with('success', 'تم تحديث الفرع بنجاح.');
+        }
+        return redirect()->back()->withInput()->with('error', 'فشل تحديث الفرع.');
+    }
+
+    /**
+     * يحذف فرعًا (حذف ناعم).
+     */
+    public function delete($id)
+    {
+        $model = new BranchModel();
+        if ($model->delete($id)) {
+            return redirect()->to('branches')->with('success', 'تم حذف الفرع بنجاح.');
+        }
+        return redirect()->to('branches')->with('error', 'فشل حذف الفرع.');
+    }
+}

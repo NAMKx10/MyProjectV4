@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class CreateBranchesTable extends Migration
+{
+    /**
+     * الدالة التي تنشئ جدول الفروع (الحاويات).
+     */
+    public function up()
+    {
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'branch_name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '255',
+            ],
+            // (مُصحّح) تم تغيير اسم العمود ليعكس المصدر الموحد للبيانات
+            'entity_type_key' => [ 
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+            ],
+            'registration_number' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => true,
+            ],
+            'tax_number' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => true,
+            ],
+            'phone' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '50',
+                'null'       => true,
+            ],
+            'email' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '150',
+                'null'       => true,
+            ],
+            'address' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'logo_path' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '255',
+                'null'       => true,
+            ],
+            'status' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '50',
+                'default'    => 'active',
+            ],
+            'created_at' => ['type' => 'DATETIME', 'null' => true],
+            'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            'deleted_at' => ['type' => 'DATETIME', 'null' => true],
+        ]);
+
+        $this->forge->addKey('id', true);
+        $this->forge->createTable('branches');
+    }
+
+    /**
+     * الدالة التي تحذف الجدول (للتراجع).
+     */
+    public function down()
+    {
+        $this->forge->dropTable('branches');
+    }
+}

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class AddPropertyCountsToBranches extends Migration
+{
+    public function up()
+    {
+        $fields = [
+            'properties_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'status',
+            ],
+            'units_count' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'default' => 0,
+                'after' => 'properties_count',
+            ],
+        ];
+
+        $this->forge->addColumn('branches', $fields);
+    }
+
+    public function down()
+    {
+        $this->forge->dropColumn('branches', ['properties_count', 'units_count']);
+    }
+}

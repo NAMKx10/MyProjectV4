@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Database\Seeds;
+
+use CodeIgniter\Database\Seeder;
+
+class RoleSeeder extends Seeder
+{
+    public function run()
+    {
+        // (جديد) نطلب من قاعدة البيانات تجاهل قيود الربط مؤقتًا
+        $this->db->query('SET FOREIGN_KEY_CHECKS=0');
+
+        // نقوم بتفريغ الجداول (الابن أولاً ثم الأب ليكون العمل منظمًا)
+        $this->db->table('role_permissions')->truncate();
+        $this->db->table('roles')->truncate();
+
+        // نجهز الأدوار الأساسية التي نريد إضافتها
+        $data = [
+            [
+                'role_name'   => 'مدير خارق',
+                'description' => 'يملك كل الصلاحيات في النظام ولا يمكن تعديله.',
+            ],
+            [
+                'role_name'   => 'مدير النظام',
+                'description' => 'دور بصلاحيات كاملة يمكن تخصيصها.',
+            ],
+        ];
+
+        // نستخدم دالة 'insertBatch' لإدخال كل البيانات دفعة واحدة
+        $this->db->table('roles')->insertBatch($data);
+        
+        // (جديد) نعيد تفعيل قيود الربط مرة أخرى
+        $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+
+        echo "Default roles seeded successfully.\n";
+    }
+}

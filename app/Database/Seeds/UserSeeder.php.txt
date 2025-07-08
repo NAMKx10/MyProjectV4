@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Database\Seeds;
+
+use CodeIgniter\Database\Seeder;
+use App\Models\UserModel; // (جديد) نستدعي الموديل لنستخدمه
+
+class UserSeeder extends Seeder
+{
+public function run()
+    {
+        // (جديد) نطلب من قاعدة البيانات تجاهل قيود الربط مؤقتًا
+        $this->db->query('SET FOREIGN_KEY_CHECKS=0');
+        
+        // (جديد) نقوم بتفريغ الجدول بالكامل
+        $this->db->table('users')->truncate();
+
+        $userModel = new UserModel();
+
+        $data = [
+            'role_id'   => 1,
+            'full_name' => 'المدير الخارق',
+            'username'  => 'superadmin',
+            'email'     => 'superadmin@app.com',
+            'password'  => '123456',
+            'is_active' => 1,
+        ];
+        $userModel->insert($data);
+        
+        // (جديد) نعيد تفعيل قيود الربط
+        $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+
+        echo "Default admin user seeded successfully.\n";
+    }
+
+}
