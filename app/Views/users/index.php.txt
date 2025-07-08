@@ -1,0 +1,51 @@
+<?php echo $this->extend('layout/default'); ?>
+<?php echo $this->section('content'); ?>
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col"><h2 class="page-title"><?= esc($title) ?></h2></div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="<?= site_url('users/new') ?>" class="btn btn-primary">
+                    <i class="ti ti-plus me-2"></i>إضافة مستخدم
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table card-table table-vcenter">
+                    <thead><tr><th>الاسم الكامل</th><th>اسم المستخدم</th><th>الدور</th><th>الحالة</th><th class="w-1"></th></tr></thead>
+                    <tbody>
+                        <?php foreach ($users as $user): ?>
+                        <tr>
+                            <td><?= esc($user['full_name']); ?></td>
+                            <td><?= esc($user['username']); ?></td>
+                            <td><?= esc($user['role_name']); ?></td>
+                            <td>
+                                <?php if($user['is_active']): ?>
+                                    <span class="badge bg-success-lt">فعال</span>
+                                <?php else: ?>
+                                    <span class="badge bg-danger-lt">غير فعال</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-end">
+                                <a href="<?= site_url('users/edit/' . $user['id']); ?>" class="btn text-warning">تعديل</a>
+                                <?php if ($user['id'] > 1): // لا نسمح بحذف المدير الخارق ?>
+                                    <a href="<?= site_url('users/delete/' . $user['id']); ?>" class="btn text-danger confirm-delete" data-csrf-token="<?= csrf_hash() ?>">حذف</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php echo $this->endSection(); ?>
