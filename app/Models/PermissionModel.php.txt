@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class PermissionModel extends Model
+{
+    /**
+     * اسم الجدول في قاعدة البيانات.
+     */
+    protected $table            = 'permissions';
+
+    /**
+     * المفتاح الرئيسي للجدول.
+     */
+    protected $primaryKey       = 'id';
+
+    /**
+     * نوع البيانات التي سيتم إرجاعها.
+     */
+    protected $returnType       = 'array';
+
+    /**
+     * تفعيل ميزة الحذف الناعم.
+     */
+    protected $useSoftDeletes   = true;
+
+    /**
+     * قائمة الحقول المسموح بإدخالها أو تحديثها.
+     */
+    protected $allowedFields    = [
+        'group_id',
+        'permission_key',
+        'description'
+    ];
+
+    // إعدادات حقول الوقت (Timestamps)
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
+}

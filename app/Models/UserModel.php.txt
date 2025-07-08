@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class UserModel extends Model
+{
+    protected $table            = 'users';
+    protected $primaryKey       = 'id';
+    protected $returnType       = 'array';
+    protected $useSoftDeletes   = true;
+
+    protected $allowedFields    = [
+        'role_id',
+        'full_name',
+        'username',
+        'email',
+        'password',
+        'is_active'
+    ];
+
+    // Dates
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
+
+    // (جديد) تفعيل الأحداث (Callbacks)
+    protected $allowCallbacks = true;
+    
+    // (جديد) تحديد الدالة التي سيتم تشغيلها قبل الإضافة والتحديث
+    protected $beforeInsert   = ['hashPassword'];
+    protected $beforeUpdate   = ['hashPassword'];
+
+    /**
+     * دالة تقوم بتشفير كلمة المرور تلقائيًا.
+     * @param array $data
+     * @return array
+     */
+    protected function hashPassword(array $data)
+    {
+        // تحقق إذا كان حقل 'password' موجودًا في البيانات المرسلة
+        if (!isset($data['data']['password'])) {
+            return $data;
+        }
+
+        // قم بتشفير كلمة المرور
+        $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
+        
+        return $data;
+    }
+}

@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class BranchModel extends Model
+{
+    /**
+     * اسم الجدول في قاعدة البيانات.
+     */
+    protected $table            = 'branches';
+
+    /**
+     * المفتاح الرئيسي للجدول.
+     */
+    protected $primaryKey       = 'id';
+
+    /**
+     * نوع البيانات التي سيتم إرجاعها.
+     */
+    protected $returnType       = 'array';
+
+    /**
+     * تفعيل ميزة الحذف الناعم.
+     */
+    protected $useSoftDeletes   = true;
+
+    /**
+     * قائمة الحقول المسموح بإدخالها أو تحديثها.
+     */
+    protected $allowedFields    = [
+        'branch_name',
+        'branch_code',
+        'entity_type_key',
+        'registration_number',
+        'tax_number',
+        'phone',
+        'email',
+        'address',
+        'notes',
+        'logo_path',
+        'status'
+    ];
+
+    // إعدادات حقول الوقت (Timestamps)
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
+}
